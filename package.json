@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/YucenLyc/tinyapp/issues"
   },
-  "homepage": "https://github.com/YucenLyc/tinyapp#readme"
+  "homepage": "https://github.com/YucenLyc/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
