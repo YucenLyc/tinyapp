@@ -6,10 +6,20 @@
 </head>
 
 <body>
+ <%- include('partial/_header') %>
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+        <td>
+          <form method="POST" action='/urls/<%= shortURL %>/edit'>
+            <button type="submit">Edit
+            </button>
+            <label>longURL</label>
+            <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 300px; margin: 1em"
+            value=<%= longURL %>>
+          </form>
+        </td>
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
     <div class="card-footer text-muted"></div>
