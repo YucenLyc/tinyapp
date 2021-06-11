@@ -97,7 +97,7 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
   if (longURL === undefined) {
-    res.send(302);
+    res.status(302);
   }
   res.redirect(longURL);
 });
@@ -128,7 +128,7 @@ app.post('/register', (req, res) => {
   };
   
   if (exsitingUser(submitEmail)) {
-    res.send(400, "An account already exists under this email address, please try again");
+    res.status(400).send("An account already exists under this email address, please try again");
   };
 
   const newUserID = generateRandomString();
