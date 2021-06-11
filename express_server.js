@@ -3,8 +3,9 @@ const app = express();
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const { render } = require("ejs");
-const PORT = 20001; // default port 8082
-app.set("view engine", "ejs"); // tells express to use ejs as the templating engine 
+const PORT = 20001; 
+app.set("view engine", "ejs"); 
+const bcrypt = require('bcryptjs');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -12,18 +13,18 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-const users ={
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
-};
+// const users ={
+//   "userRandomID": {
+//     id: "userRandomID", 
+//     email: "user@example.com", 
+//     password: "purple-monkey-dinosaur"
+//   },
+//  "user2RandomID": {
+//     id: "user2RandomID", 
+//     email: "user2@example.com", 
+//     password: "dishwasher-funk"
+//   }
+// };
 const generateRandomString = function() {
   let randomString = "";
   for (let i = 0; i < 6; i++) {
@@ -51,11 +52,11 @@ const urlsForUser = function(id) {
   }
   return userUrls; 
 };
-
-const urlDatabase = {
-  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
-  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID"},
-};
+// object with shortURL, longURL and userID as keys 
+// const urlDatabase = {
+//   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
+//   "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID"},
+// };
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -71,22 +72,21 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_new", templateVars);
   if (!req.cookies["user_id"]) {
-    res.redirect('/login');
-  } 
-  res.render("urls_new", templateVars);
-  
+    res.redirect("/login");
+  } else {
+    let templateVars = {
+      user: users[req.cookies["user_id"]],
+    };
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
     longURL: urlDatabase[req.params.shortURL.longURL],
-    urlUserID: urlDatabase[req.params.shortURL].userID,
+    urlUserID: urlDatabase[req.params.shortURL.userID],
     user: users[req.cookies["user_id"]],
   }; 
   console.log(templateVars.urlUserID, "printing hereeeeeee")
@@ -111,12 +111,38 @@ app.get("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: req.cookies["user_id"]
+    user: users[req.cookies["user_id"]]
   };
   console.log(templateVars);
   res.render("urls_login", templateVars);
 });
 //-------------------POST---------------------------------------------------------------//
+
+
+app.post('/register', (req, res) => {
+  const submitEmail = req.body.email;
+  const submitPassword = req.body.password;
+
+  if (!submitEmail || !submitPassword) {
+    res.status(400).send("please enter a valid email address and password");
+  };
+  
+  if (exsitingUser(submitEmail)) {
+    res.send(400, "An account already exists under this email address, please try again");
+  };
+
+  const newUserID = generateRandomString();
+  users[newUserID] = {
+    id: newUserID,
+    email: submitEmail,
+    // password: submitPassword //hashing
+    password: bcrypt.hashSync(submitPassword, 10), 
+  };
+  console.log(users[password]);
+
+  res.cookie('user_id', newUserID);
+  res.redirect("/urls");
+});
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
@@ -164,13 +190,14 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 app.post('/login', (req, res) => { //update: endpoint to look up email address
 
   const email = req.body.email;
+  console.log(email);
   const password = req.body.password;
   
   if(!exsitingUser(email)) {
     res.status(403).send("No account associated with this email address")
   } else {
     const userID = exsitingUser(email);
-    if (users[userID].password !== password) {
+    if (!bcrypt.compareSync(password, users[userID].password)) {
       res.sendStatus(403).send("Incorrect Password, Please Try Again");
     } else {
       res.cookie('user_id', userID);
@@ -184,26 +211,6 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
-app.post('/register', (req, res) => {
-  const submitEmail = req.body.email;
-  const submitPassword = req.body.password;
 
-  if (!submitEmail || !submitPassword) {
-    res.status(400).send("please enter a valid email address and password");
-  };
-  
-  if (exsitingUser(submitEmail)) {
-    res.send(400, "An account already exists under this email address, please try again");
-  };
-
-  const newUserId = generateRandomString();
-  users[newUserId] = {
-    id: newUserId,
-    email: submitEmail,
-    password: submitPassword //hashing
-  };
-  res.cookie('user_id', newUserId);
-  res.redirect("/urls");
-});
 
 
