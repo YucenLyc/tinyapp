@@ -40,14 +40,32 @@ const generateRandomString = function() {
   return randomString;
 };
 //check to see if submitted email from registration form already exists in urser database //
-const exsitingUser = function(email) {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user].id
-    } 
+// const exsitingUser = function(email) {
+//   for (const user in users) {
+//     if (users[user].email === email) {
+//       return users[user].id;
+//     } 
+//   }
+//   return false;
+// };
+// Check if given email matches with a user in the database, returns a boolean
+const hasUserEmail = function (email, userDatabase) {
+  for (const user in userDatabase){
+    if (userDatabase[user].email === email) {
+      return true 
+    }
   }
   return false;
+}
+// Take an email and userDatabase and returns the user ID for the user with the given email address
+const getUserbyEmail = function(email, userDatabase) {
+  for (const user in userDatabase) {
+    if (userDatabase[user].email === email) {
+      return userDatabase[user].id;
+    }
+  }
 };
+
 const urlsForUser = function(id) {
   const userUrls = {};
   for (const shortURL in urlDatabase) {
@@ -57,10 +75,9 @@ const urlsForUser = function(id) {
   } 
   return userUrls;
 };
-// object with shortURL, longURL and userID as keys 
+
  const urlDatabase = {
-//   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
-//   "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID"},
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
 };
 
 app.get("/", (req, res) => {
@@ -118,9 +135,8 @@ app.get("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = {
-    user: users[req.session["user_id"]]
-  };
-  console.log(templateVars);
+    user: users[req.session.user_id],
+  }
   res.render("urls_login", templateVars);
 });
 //-------------------POST---------------------------------------------------------------//
@@ -134,7 +150,7 @@ app.post('/register', (req, res) => {
     res.status(400).send("please enter a valid email address and password");
   };
   
-  if (exsitingUser(submitEmail)) {
+  if (hasUserEmail(submitEmail, users)) {
     res.status(400).send("An account already exists under this email address, please try again");
   };
 
@@ -200,10 +216,10 @@ app.post('/login', (req, res) => { //update: endpoint to look up email address
   console.log(email);
   const password = req.body.password;
   
-  if(!exsitingUser(email)) {
+  if(!hasUserEmail(email, users)) {
     res.status(403).send("No account associated with this email address")
   } else {
-    const userID = exsitingUser(email);
+    const userID = hasUserEmail(email, users);
     if (!bcrypt.compareSync(password, users[userID].password)) {
       res.sendStatus(403).send("Incorrect Password, Please Try Again");
     } else {
