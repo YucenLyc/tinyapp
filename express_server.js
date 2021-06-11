@@ -85,11 +85,11 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { 
     shortURL: req.params.shortURL, 
-    longURL: urlDatabase[req.params.shortURL].longURL,
+    longURL: urlDatabase[req.params.shortURL.longURL],
     urlUserID: urlDatabase[req.params.shortURL].userID,
     user: users[req.cookies["user_id"]],
-  };
-  console.log(templateVars);
+  }; 
+  console.log(templateVars.urlUserID, "printing hereeeeeee")
   res.render("urls_show", templateVars);
 });
 
@@ -128,10 +128,26 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/:${shortURL}`);
 });
 
+app.post("/urls/:id", (req, res) => {
+  const userID = req.cookies["user_id"];
+  const userUrls = urlsForUser(userID);
+  if (Object.keys(userUrls).includes(req.params.id)) {
+    const shortURL = req.params.id;
+    urlDatabase[shortURL].longURL = req.body.newURL;
+    res.redirect('/urls');
+  }
+  res.send(401);
+})
+
 app.post('/urls/:shortURL/delete', (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  // console.log("URL deleted", URLToBeDeleted)
-  res.redirect("/urls");
+  const userID = req.cookies["user_id"];
+  const userUrls = urlsForUser(userID);
+  if (Object.keys(userUrls).includes(req.params.shortURL)) {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  }
+  res.send(401);
 });
 
 app.post('/urls/:shortURL/edit', (req, res) => {
@@ -161,8 +177,6 @@ app.post('/login', (req, res) => { //update: endpoint to look up email address
       res.redirect('/urls');
     }
   }
-
-
 });
 
 app.post('/logout', (req, res) => {
