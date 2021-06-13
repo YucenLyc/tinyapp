@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
-// const { render } = require("ejs");
+const { render } = require("ejs");
 app.set("view engine", "ejs");
 const bcrypt = require("bcryptjs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -83,6 +83,7 @@ app.get("/login", (req, res) => {
 });
 //if the user is logged in: show the short URLs for the given ID, corresponding long URL; update button that makes a POST request to /urls/:id
 app.get("/urls/:shortURL", (req, res) => {
+  console.log(urlDatabase[req.params.shortURL]);
   if (urlDatabase[req.params.shortURL]) {
     let templateVars = {
       shortURL: req.params.shortURL,
@@ -90,9 +91,12 @@ app.get("/urls/:shortURL", (req, res) => {
       urlUserID: urlDatabase[req.params.shortURL.userID],
       user: users[req.session.user_id],
     };
+    console.log(templateVars, "checking if something wrong")
     res.render("urls_show", templateVars);
+    
   } else {
     res.status(404).send("The Short URL you entered does not correspond with a long URL at this time.")
+    
   }
 });
 
@@ -120,9 +124,10 @@ app.post("/urls", (req, res) => {
     const shortURL = generateRandomString();
     urlDatabase[shortURL] = {
       longURL: req.body.longURL,
-      userID: req.session["user_id"],
+      userID: req.session.user_id,
     };
-    res.redirect(`/urls/:${shortURL}`);
+    console.log(urlDatabase);
+    res.redirect(`/urls/${shortURL}`);
   } else {
     res.status(401).send("You Must Log In before Createing Short URLs.")
   }
