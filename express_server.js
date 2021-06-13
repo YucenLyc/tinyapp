@@ -83,7 +83,6 @@ app.get("/login", (req, res) => {
 });
 //if the user is logged in: show the short URLs for the given ID, corresponding long URL; update button that makes a POST request to /urls/:id
 app.get("/urls/:shortURL", (req, res) => {
-  console.log(urlDatabase[req.params.shortURL]);
   if (urlDatabase[req.params.shortURL]) {
     let templateVars = {
       shortURL: req.params.shortURL,
@@ -91,7 +90,6 @@ app.get("/urls/:shortURL", (req, res) => {
       urlUserID: urlDatabase[req.params.shortURL.userID],
       user: users[req.session.user_id],
     };
-    console.log(templateVars, "checking if something wrong")
     res.render("urls_show", templateVars);
     
   } else {
