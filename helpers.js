@@ -11,13 +11,13 @@ const generateRandomString = function() {
 
 // Check if given email matches with a user in the database, returns a boolean
 const hasUserEmail = function (email, userDatabase) {
-  for (const user in userDatabase){
+  for (const user in userDatabase) {
     if (userDatabase[user].email === email) {
       return true 
     }
   }
   return false;
-}
+};
 // Take an email and userDatabase and returns the user ID for the user with the given email address
 const getUserbyEmail = function(email, userDatabase) {
   for (const user in userDatabase) {
@@ -44,7 +44,7 @@ const cookieHasUser = function (cookie, userDatabase) {
     }
   }
   return false;
-}
+};
  
 
 module.exports = {
