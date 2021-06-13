@@ -23,7 +23,7 @@ const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
 };
 
-const {
+const { //calling functions stored in helpers.js
   generateRandomString,
   hasUserEmail,
   getUserbyEmail,
@@ -71,6 +71,7 @@ app.get("/register", (req, res) => {
   }
 });
 
+
 app.get("/login", (req, res) => {
   if (cookieHasUser(req.session.user_id, users)) {
     res.redirect("/urls");
@@ -81,7 +82,8 @@ app.get("/login", (req, res) => {
     res.render("urls_login", templateVars);
   }
 });
-//if the user is logged in: show the short URLs for the given ID, corresponding long URL; update button that makes a POST request to /urls/:id
+
+
 app.get("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     let templateVars = {
@@ -97,6 +99,7 @@ app.get("/urls/:shortURL", (req, res) => {
     
   }
 });
+
 
 // Redirect to the corresponding long URL, from the urlDatabase
 app.get("/u/:shortURL", (req, res) => {
@@ -126,6 +129,7 @@ app.post("/urls", (req, res) => {
   }
 });
 
+
 app.post('/register', (req, res) => {
   const submitEmail = req.body.email;
   const submitPassword = req.body.password;
@@ -146,6 +150,7 @@ app.post('/register', (req, res) => {
   }
 });
 
+
 app.post('/login', (req, res) => { //update: endpoint to look up email address
   const email = req.body.email;
   const password = req.body.password;
@@ -163,10 +168,12 @@ app.post('/login', (req, res) => { //update: endpoint to look up email address
   }
 });
 
+
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
+
 
 app.post("/urls/:id", (req, res) => {
   const userID = req.session["user_id"];
@@ -177,7 +184,8 @@ app.post("/urls/:id", (req, res) => {
     res.redirect("/urls");
   }
   res.status(401).send("You Are Not Authorized to Edit this Short URL.");
-})
+});
+
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userID = req.session.user_id;
@@ -189,10 +197,3 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   }
   res.send(401).send("You Are Not Authorized To Delete This Short URL.");
 });
-
-
-
-
-
-
-
