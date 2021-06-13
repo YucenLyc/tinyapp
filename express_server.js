@@ -102,7 +102,6 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL].longURL;
-    console.log(longURL, "message for printing long URL");
     if (longURL === undefined) {
       res.status(302);
     } else {
@@ -114,9 +113,6 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-
-//-------------------POST---------------------------------------------------------------//
-
 app.post("/urls", (req, res) => {
   if (req.session.user_id) {
     const shortURL = generateRandomString();
@@ -124,7 +120,6 @@ app.post("/urls", (req, res) => {
       longURL: req.body.longURL,
       userID: req.session.user_id,
     };
-    console.log(urlDatabase);
     res.redirect(`/urls/${shortURL}`);
   } else {
     res.status(401).send("You Must Log In before Createing Short URLs.")
@@ -147,14 +142,12 @@ app.post('/register', (req, res) => {
       password: bcrypt.hashSync(submitPassword, 10),
     };
     req.session.user_id = newUserID;
-    console.log(newUserID, "this is the new user ID");
     res.redirect("/urls");
   }
 });
 
 app.post('/login', (req, res) => { //update: endpoint to look up email address
   const email = req.body.email;
-  //console.log(email);
   const password = req.body.password;
 
   if (!hasUserEmail(email, users)) {
